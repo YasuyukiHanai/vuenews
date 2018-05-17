@@ -83,6 +83,6 @@ const vm = new Vue({
 
 if (window.addEventListener || window.history || window.requestAnimationFrame || document.getElementsByClassName) {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js');
+    navigator.serviceWorker.register('/service-worker.js');
   }
 }
