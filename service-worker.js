@@ -3,7 +3,16 @@
 
 const
   version = '1.0.0',
-  CACHE = version + '::VueNews';
+  CACHE = version + '::VueNews',
+  installFilesEssential = [
+    '/',
+    'manifest.json',
+    'styles.css',
+    'logo/logo152.png'
+  ].concat(offlineURL),
+  installFilesDesirable = [
+    'logo/logo016.png'
+  ];
 
 // install static assets
 function installStaticFiles() {
