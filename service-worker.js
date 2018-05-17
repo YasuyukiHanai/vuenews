@@ -7,7 +7,7 @@ const
   installFilesEssential = [
     '/',
     'manifest.json',
-    'styles.css',
+    'style.css',
     'logo/logo152.png'
   ],
   installFilesDesirable = [
