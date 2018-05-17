@@ -3,7 +3,7 @@
 
 const
   version = '1.0.0',
-  CACHE = version + '::PWAsite';
+  CACHE = version + '::VueNews';
 
 // install static assets
 function installStaticFiles() {
