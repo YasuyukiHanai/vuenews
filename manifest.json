@@ -2,7 +2,7 @@
   "name"              : "VueNews JP",
   "short_name"        : "VueNews",
   "description"       : "test site",
-  "start_url"         : "/vuenews/",
+  "start_url"         : "/",
   "display"           : "standalone",
   "orientation"       : "any",
   "background_color"  : "#fff",
