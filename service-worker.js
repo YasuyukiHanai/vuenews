@@ -9,7 +9,7 @@ const
     'manifest.json',
     'styles.css',
     'logo/logo152.png'
-  ].concat(offlineURL),
+  ],
   installFilesDesirable = [
     'logo/logo016.png'
   ];
