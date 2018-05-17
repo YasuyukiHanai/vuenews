@@ -1,0 +1,48 @@
+h1, h2, h3, h4, h5, h6, p {
+    font-family: "Mplus 1p";
+}
+p {
+    font-size: 88%;
+}
+.container {
+    padding: 20px 0;
+    background-image: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
+}
+.column:last-child:not(:first-child), .columns:last-child:not(:first-child) {
+    float: left;
+}
+.main_heading {
+    margin: 10px 0 30px;
+}
+.callout {
+    border: none;
+    margin-bottom: 40px;
+    background: #E0EAFC;
+    background: -webkit-linear-gradient(to bottom, #CFDEF3, #E0EAFC);
+    background: linear-gradient(to bottom, #CFDEF3, #E0EAFC);
+    background-image: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+}
+select {
+    text-transform:capitalize;
+}
+.loader {
+    text-align: center;
+    padding: 40px;
+}
+.uppercase {
+    text-transform: uppercase;
+}
+.card-img {
+    text-align: center;
+}
+
+@media screen and (min-width: 40em) and (max-width: 64em)  {
+    .callout .columns:last-child:not(:first-child) {
+        float: none;
+        margin: auto;
+        clear: both;
+    }
+    .medium-6:nth-child(2n+1) {
+        clear: both;
+    }
+}
