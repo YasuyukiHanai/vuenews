@@ -1,145 +1,75 @@
 // configuration
-`use strict`;
+'use strict';
 
-const
-  version = '1.0.0',
-  CACHE = version + '::VueNews',
-  installFilesEssential = [
+const CACHE_NAME = 'cache-v1';
+const urlsToCache = [
     '/',
     'manifest.json',
     'style.css',
     'logo/logo152.png'
-  ],
-  installFilesDesirable = [
     'logo/logo016.png'
   ];
 
-// install static assets
-function installStaticFiles() {
+self.addEventListener('install', (event) => {
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+              .then((cache) => {
+                  console.log('Opened cache');
 
-  return caches.open(CACHE)
-    .then(cache => {
-
-      // cache desirable files
-      cache.addAll(installFilesDesirable);
-
-      // cache essential files
-      return cache.addAll(installFilesEssential);
-
-    });
-
-}
-
-// clear old caches
-function clearOldCaches() {
-
-  return caches.keys()
-    .then(keylist => {
-
-      return Promise.all(
-        keylist
-          .filter(key => key !== CACHE)
-          .map(key => caches.delete(key))
-      );
-
-    });
-
-}
-
-// application installation
-self.addEventListener('install', event => {
-
-  console.log('service worker: install');
-
-  // cache core files
-  event.waitUntil(
-    installStaticFiles()
-    .then(() => self.skipWaiting())
-  );
-
-});
-
-
-// application activated
-self.addEventListener('activate', event => {
-
-  console.log('service worker: activate');
-
-	// delete old caches
-  event.waitUntil(
-    clearOldCaches()
-    .then(() => self.clients.claim())
-	);
-
-});
-
-
-// is image URL?
-let iExt = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp'].map(f => '.' + f);
-function isImage(url) {
-
-  return iExt.reduce((ret, ext) => ret || url.endsWith(ext), false);
-
-}
-
-
-// return offline asset
-// function offlineAsset(url) {
-
-//   if (isImage(url)) {
-
-//     // return image
-//     return new Response(
-//       '<svg role="img" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg"><title>offline</title><path d="M0 0h400v300H0z" fill="#eee" /><text x="200" y="150" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="50" fill="#ccc">offline</text></svg>',
-//       { headers: {
-//         'Content-Type': 'image/svg+xml',
-//         'Cache-Control': 'no-store'
-//       }}
-//     );
-
-//   }
-
-// }
-
-
-// application fetch network data
-self.addEventListener('fetch', event => {
-
-  // abandon non-GET requests
-  if (event.request.method !== 'GET') return;
-
-  let url = event.request.url;
-
-  event.respondWith(
-
-    caches.open(CACHE)
-      .then(cache => {
-
-        return cache.match(event.request)
-          .then(response => {
-
-            if (response) {
-              // return cached file
-              console.log('cache fetch: ' + url);
-              return response;
-            }
-
-            // make network request
-            return fetch(event.request)
-              .then(newreq => {
-
-                console.log('network fetch: ' + url);
-                if (newreq.ok) cache.put(event.request, newreq.clone());
-                return newreq;
-
+                  // 指定されたリソースをキャッシュに追加する
+                  return cache.addAll(urlsToCache);
               })
-              // app is offline
-              //.catch(() => offlineAsset(url));
+    );
+});
 
-          });
+self.addEventListener('activate', (event) => {
+    var cacheWhitelist = [CACHE_NAME];
 
-      })
+    event.waitUntil(
+        caches.keys().then((cacheNames) => {
+            return Promise.all(
+                cacheNames.map((cacheName) => {
+                    // ホワイトリストにないキャッシュ(古いキャッシュ)は削除する
+                    if (cacheWhitelist.indexOf(cacheName) === -1) {
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
+        })
+    );
+});
 
-  );
+self.addEventListener('fetch', (event) => {
+    event.respondWith(
+        caches.match(event.request)
+              .then((response) => {
+                  if (response) {
+                      return response;
+                  }
 
+                  // 重要：リクエストを clone する。リクエストは Stream なので
+                  // 一度しか処理できない。ここではキャッシュ用、fetch 用と2回
+                  // 必要なので、リクエストは clone しないといけない
+                  let fetchRequest = event.request.clone();
+
+                  return fetch(fetchRequest)
+                      .then((response) => {
+                          if (!response || response.status !== 200 || response.type !== 'basic') {
+                              return response;
+                          }
+
+                          // 重要：レスポンスを clone する。レスポンスは Stream で
+                          // ブラウザ用とキャッシュ用の2回必要。なので clone して
+                          // 2つの Stream があるようにする
+                          let responseToCache = response.clone();
+
+                          caches.open(CACHE_NAME)
+                                .then((cache) => {
+                                    cache.put(event.request, responseToCache);
+                                });
+
+                          return response;
+                      });
+              })
+    );
 });
